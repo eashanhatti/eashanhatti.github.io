@@ -22,6 +22,21 @@ These are my notes on various topics, taken according to the <a href="https://en
 <br><br>
 
 
+<h3 id="53"><a href="/notes.html#53" class="note">#53 - 2022-03-31</a></h3>
+<footer class="note">
+Tags: <strong class="tag">rant</strong>, <strong class="tag">metaprogramming</strong>, <strong class="tag">2ltt</strong><br>
+Continuation of: <a href="/notes.html#20">#20</a><br>
+Continued by: 
+</footer>
+<p>Ooh I think I’ve found a solutions to the big problem I’ve been working on. The problem is pretty simple in essence “Which program representation do we give meta-level optimizers access to?”.</p>
+<p>Doing optimizations on the surface language is a big no-no - the surface language contains too many user-facing details that optimizers shouldn’t have to care about. Well alright, what about the core language? Problem with that is that the core language doesn’t give enough control over performance. You can’t fuse allocations or change data representations or transform recursive functions into loops.</p>
+<p>Well alright, what about STG? That kinda works. But now we have another problem - well, not really a problem, but a wart. Userspace optimizers sit on top of the “default” way to lower core to STG. The built-in lowering - the lowering procedure that’s a part of the compiler - doesn’t do any smart optimizations. “Well, why not just make the STG lowering pass smarter? Make it optimize better?”. But isn’t complex built-in optimizers exactly what we were trying to avoid in the first place? The meta-level is supposed to have complete control over how optimization works, but we’re forcing it to share space with the “default” optimizer
+So basically, my solution to the problem is to get rid of the built-in lowering pass entirely. Metaprograms will have complete control over compilation to STG - nothing will be implemented in the compiler at all</p>
+<p>.. guh, codegen is delayed then? Seems like it<br />
+I’ll have to implement more of the metalanguage. But maybe that’s a good thing - forcing me to do this. I actually haven’t implemented any metaprogramming capabilities - I’ll be forced to focus on it, which I’d say is a good thing</p>
+<p>To be clear, there’s nothing special about STG here - the important thing is that we give metaprograms access to a low-level program representation</p>
+
+
 <h3 id="52"><a href="/notes.html#52" class="note">#52 - 2022-03-28</a></h3>
 <footer class="note">
 Tags: <br>
@@ -305,7 +320,7 @@ Continued by:
 <h3 id="25"><a href="/notes.html#25" class="note">#25 - 2022-01-30</a></h3>
 <footer class="note">
 Tags: <strong class="tag">partial_evaluation</strong><br>
-Continuation of: <a href="/notes.html#24">#24</a>, <a href="/notes.html#20">#20</a><br>
+Continuation of: <a href="/notes.html#20">#20</a><br>
 Continued by: <a href="/notes.html#26">#26</a>
 </footer>
 <p>Thoughts on partial evaluation: Partial evaluation is great because it allows you to easily create code generators. However, it is limited in that it doesn’t do the same for <em>optimizers</em>. The compiler still has to take care of all optimization</p>
@@ -315,7 +330,7 @@ Continued by: <a href="/notes.html#26">#26</a>
 <footer class="note">
 Tags: <br>
 Continuation of: <a href="/notes.html#22">#22</a><br>
-Continued by: <a href="/notes.html#25">#25</a>
+Continued by: 
 </footer>
 <p>Need some sort of meta-level abstraction for this, perhaps similar to the list monad? It would allow you to chain optimizers together, producing all possible resultss lazily, and then allow you to select from that space of results based on a hueristic</p>
 
@@ -395,7 +410,7 @@ optimize 3 (ask &gt;&gt;= \x. pure (x + 2))
 <footer class="note">
 Tags: <strong class="tag">2ltt</strong>, <strong class="tag">rant</strong><br>
 Continuation of: <a href="/notes.html#17">#17</a>, <a href="/notes.html#18">#18</a><br>
-Continued by: <a href="/notes.html#25">#25</a>, <a href="/notes.html#21">#21</a>
+Continued by: <a href="/notes.html#53">#53</a>, <a href="/notes.html#25">#25</a>, <a href="/notes.html#21">#21</a>
 </footer>
 <p>There’s a tension I’m feeling with regard to 2LTT. How does one decide how high- or low-level the meta language and object language should be? Let’s take things to the extreme first. The object language will be something close to the abstraction level of assembly, while the meta language is at the level of Agda. In order to program effectively in this language, every program has to be a compiler. Even a feature as simple as functions would be implemented in userspace. I realize that this is what I (and probably a lot of others) have dreamt about - a language where literally everything is implemented in userspace. You don’t have to implement <em>everything</em> from scratch though, of course you can write compilers in terms of existing compilers.</p>
 <p>For some reason though, this feels uncomfortable. Now that the “most powerful language” is theoretically achievable, it doesn’t seem like a good idea. Here’s why: Being able to program at the lowest level doesn’t mean your programs are efficient. Take this example: Idris can compile to C. C is a fast language. So why is Idris not as fast as C? Because the compiled C code uses a lot of abstractions.</p>
