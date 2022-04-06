@@ -22,10 +22,49 @@ These are my notes on various topics, taken according to the <a href="https://en
 <br><br>
 
 
+<h3 id="57"><a href="/notes.html#57" class="note">#57 - 2022-04-06</a></h3>
+<footer class="note">
+Tags: <br>
+Continuation of: <a href="/notes.html#53">#53</a><br>
+Continued by: 
+</footer>
+<p>I’m interested in verifying preservation of semantics for compiler passes. In Konna, metaprograms are essentially compilers from the core language to a lower level language, so it would be great if users could verify that their optimization passes/compilers preserve the semantics of the input program. Maybe my interest in cubical will tie into this? I think it’s really cool that I’ve been able to find a place for theorem proving in the language!</p>
+
+
+<h3 id="56"><a href="/notes.html#56" class="note">#56 - 2022-04-06</a></h3>
+<footer class="note">
+Tags: <strong class="tag">cubical_tt</strong><br>
+Continuation of: <br>
+Continued by: 
+</footer>
+<p>I’m reading up on cubical type theory, it’s really interesting! Current thoughts/observations/questions:</p>
+<ul>
+<li>Is it correct that equalities are reinterpreted as functions on the interval type? Maybe that’s not the best way of saying it</li>
+<li>I think the main about cubical (and HoTT in general) is that you can use isomorphisms to reuse theorems for disparate types. E.g we have <code>Maybe a</code> being isomorphic to <code>Either a ()</code>, so we can prove theorems about <code>Maybe a</code> and have those hold for <code>Either a ()</code> as well</li>
+<li>Higher inductive types allow you to add constructors to the equality type</li>
+<li><a href="https://1lab.dev/1Lab.Path.html">“We can “upgrade” any function f : I → A to a Path”</a>. I’m a little confused about this. Wouldn’t this allow you to construct equalities between terms that aren’t actually equal? E.g I could have <code>f = λi. case i of { i0 -&gt; 3, i1 -&gt; 4 }</code>, and now we can prove that <code>3 = 4</code></li>
+<li>How does pattern matching on higher inductive types work? The equality constructors are of, well, the equality type, not the type they specify an equality for</li>
+</ul>
+<p>I’m working off of these two resources at the moment</p>
+<ul>
+<li><a href="https://1lab.dev/1Lab.Path.html">1lab.dev - Path</a></li>
+<li><a href="https://gist.github.com/AndyShiue/cfc8c75f8b8655ca7ef2ffeb8cfb1faf/">Cubical type theory for dummies</a></li>
+</ul>
+
+
+<h3 id="55"><a href="/notes.html#55" class="note">#55 - 2022-04-06</a></h3>
+<footer class="note">
+Tags: <br>
+Continuation of: <a href="/notes.html#52">#52</a><br>
+Continued by: 
+</footer>
+<p>On second though, no. Go-style inferfaces still restrict you to a single canonical implementation, implicit implementations are really just syntactic convenience</p>
+
+
 <h3 id="54"><a href="/notes.html#54" class="note">#54 - 2022-03-31</a></h3>
 <footer class="note">
 Tags: <br>
-Continuation of: <br>
+Continuation of: <a href="/notes.html#53">#53</a><br>
 Continued by: 
 </footer>
 <p><a href="https://nbviewer.org/github/grin-compiler/grin/blob/master/papers/boquist.pdf">Code Optimization Techniques for Lazy Functional Languages</a></p>
@@ -35,7 +74,7 @@ Continued by:
 <footer class="note">
 Tags: <strong class="tag">rant</strong>, <strong class="tag">metaprogramming</strong>, <strong class="tag">2ltt</strong><br>
 Continuation of: <a href="/notes.html#20">#20</a><br>
-Continued by: 
+Continued by: <a href="/notes.html#57">#57</a>, <a href="/notes.html#54">#54</a>
 </footer>
 <p>Ooh I think I’ve found a solutions to the big problem I’ve been working on. The problem is pretty simple in essence “Which program representation do we give meta-level optimizers access to?”.</p>
 <p>Doing optimizations on the surface language is a big no-no - the surface language contains too many user-facing details that optimizers shouldn’t have to care about. Well alright, what about the core language? Problem with that is that the core language doesn’t give enough control over performance. You can’t fuse allocations or change data representations or transform recursive functions into loops.</p>
@@ -50,7 +89,7 @@ I’ll have to implement more of the metalanguage. But maybe that’s a good thi
 <footer class="note">
 Tags: <br>
 Continuation of: <br>
-Continued by: 
+Continued by: <a href="/notes.html#55">#55</a>
 </footer>
 <p>I quite like how <a href="https://go.dev/tour/methods/10">Go’s interfaces are implemented implicitly</a>. Should I do the same in Konna?</p>
 
