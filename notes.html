@@ -22,6 +22,16 @@ These are my notes on various topics, taken according to the <a href="https://en
 <br><br>
 
 
+<h3 id="60"><a href="/notes.html#60" class="note">#60 - 2022-04-15</a></h3>
+<footer class="note">
+Tags: <strong class="tag">2ltt</strong><br>
+Continuation of: <br>
+Continued by: 
+</footer>
+<p>I’ve realized that my implementation of metaprogramming in Konna had some major issues. Thankfully though, this realization has clarified a large portion of the design that I was unsure about. I had implement quotes as a type in the metalanguage, but not all its constructors had equivalents in the object language. This meant that I couldn’t implement splicing. To be specific: core terms all obviously had equivalents in the object language, but the low terms did not.</p>
+<p>So, now what I need to do is add a new object language for low terms. Along with that, separate quoting and splicing for the two object languages. The cool thing about this is the low level can now be a fully fledged language.</p>
+
+
 <h3 id="59"><a href="/notes.html#59" class="note">#59 - 2022-04-15</a></h3>
 <footer class="note">
 Tags: <br>
