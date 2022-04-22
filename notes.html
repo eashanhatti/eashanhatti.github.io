@@ -22,6 +22,45 @@ These are my notes on various topics, taken according to the <a href="https://en
 <br><br>
 
 
+<h3 id="61"><a href="/notes.html#61" class="note">#61 - 2022-04-22</a></h3>
+<footer class="note">
+Tags: <strong class="tag">haskell</strong>, <strong class="tag">elaboration</strong><br>
+Continuation of: <br>
+Continued by: 
+</footer>
+<p>Haskell has <code>do</code> notation, which is a nice sugar for use of the monadic <code>&gt;&gt;=</code> and <code>pure</code> functions</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>add x y <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  x&#39; <span class="ot">&lt;-</span> x</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  y&#39; <span class="ot">&lt;-</span> y</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pure</span> (x <span class="op">+</span> y)</span></code></pre></div>
+<p>Instead of</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>add x y <span class="ot">=</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  x <span class="op">&gt;&gt;=</span> \x&#39; <span class="ot">-&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">&gt;&gt;=</span> \y&#39; <span class="ot">-&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pure</span> (x <span class="op">+</span> y)</span></code></pre></div>
+<p>But IMO, this isn’t much of an improvement because you still lose direct-style code. Every time you <code>&gt;&gt;=</code> an action, you have to bind a variable</p>
+<p>Idris improves upon this a lot with <code>!</code> (bang) notation, which allows you to do</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>add x y <span class="ot">=</span> <span class="fu">pure</span> (<span class="op">!</span>x <span class="op">+</span> <span class="op">!</span>y)</span></code></pre></div>
+<p>But this could still be improved. Why do we have to have the <code>!</code>s? It isn’t a mere syntactic choice, it reflect the fact that monadic computations are first class! Both of the following programs are valid</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>foo act1 act2 <span class="ot">=</span> <span class="fu">pure</span> (act1, act2)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>bar act1 act <span class="ot">=</span> <span class="fu">pure</span> (<span class="op">!</span>act1, <span class="op">!</span>act2)</span></code></pre></div>
+<p>Their types are inferred as</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">:</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> m (a, b)</span></code></pre></div>
+<p>and</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bar <span class="op">:</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m (a, b)</span></code></pre></div>
+<p>(The <code>a</code>s, <code>b</code>s, and <code>m</code>s are not shared between the two examples. To be more clear, I could have used <code>c</code>, <code>d</code>, and <code>n</code> for <code>bar</code>)
+If we don’t have some syntax to distinguish when we want to execute a computation vs store it, it’s ambiguous! But what’s the simplest solution for type inference ambiguity? It’s simply to require type signatures</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>baz <span class="op">:</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m (a, b)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>baz act1 act2 <span class="ot">=</span> <span class="fu">pure</span> (act1, act2)</span></code></pre></div>
+<p>We have explicitly given the type signature and the ambiguity is gone. The <code>!</code>s are no longer required. The compiler now knows it can transform this code into</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>baz <span class="op">:</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m (a, b)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>baz act1 act2 <span class="ot">=</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  act1 <span class="op">&gt;&gt;=</span> \val1 <span class="ot">-&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    act2 <span class="op">&gt;&gt;=</span> \val2 <span class="ot">-&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pure</span> (val1, val2)</span></code></pre></div>
+<p>I think requiring type sigs on toplevel declarations is a good idea anyway, just for code readability</p>
+
+
 <h3 id="60"><a href="/notes.html#60" class="note">#60 - 2022-04-15</a></h3>
 <footer class="note">
 Tags: <strong class="tag">2ltt</strong><br>
