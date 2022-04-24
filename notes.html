@@ -22,6 +22,17 @@ These are my notes on various topics, taken according to the <a href="https://en
 <br><br>
 
 
+<h3 id="62"><a href="/notes.html#62" class="note">#62 - 2022-04-24</a></h3>
+<footer class="note">
+Tags: <strong class="tag">module</strong><br>
+Continuation of: <br>
+Continued by: 
+</footer>
+<p>Been looking into ML modules again, which led me to an interesting problem - bundled vs unbundled representations. CoolTT uses “record patching” and singleton types to make the latter unnecessary - the former can always be converted to the latter</p>
+<p>Let’s say we have <code>let Monoid = Record { T : Type, op : T -&gt; T -&gt; T, /* laws */ }</code> (where <code>Record</code> forms an anonymous record type). Record patching <code>Monoid [ T .= Int ]</code> elaborates to <code>Record { T : Singleton Type Int, op : T -&gt; T -&gt; T, /* laws */ }</code> - <code>T</code> is now definitionally equal to <code>Int</code>, which is what we get from the <em>un</em>bundled representation</p>
+<p>I was wondering if you could use identity types instead of singleton types, e.g elaborate <code>Monoid [T .= Int]</code> to <code>Record { T : Type, constraint : T = Int, ... }</code>, but this actually doesn’t work unless equality is extensional. We want <code>T</code> to be <em>definitionally</em> equal to <code>Int</code>, <code>=</code> merely establishes a propositional equality. But if you’re already using extensional type theory, this works!</p>
+
+
 <h3 id="61"><a href="/notes.html#61" class="note">#61 - 2022-04-22</a></h3>
 <footer class="note">
 Tags: <strong class="tag">haskell</strong>, <strong class="tag">elaboration</strong><br>
